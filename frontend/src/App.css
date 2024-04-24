@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.height {
+    height: calc(100vh - 4rem);
+}
+.height2 {
+    height: calc(100vh - 13rem);
+}
+
+.chatMenu {
+    flex: 3.5;
+    
+}
+
+.chatBox {
+    flex: 5.5;
+
+}
+
+.chatOnine {
+    flex: 3;
+   
+}
+
+/* .chatMenuWrapper,
+.chatBoxWrapper,
+.chatOnlineWrapper {
+    padding: 10px;
+    height: 100%;
+} */
