@@ -3,7 +3,7 @@ import { useState } from 'react'
 import ChatItem from '../components/ChatItem'
 import { useEffect } from 'react'
 
-function Conversation({ user }) {
+function Conversation({ user, currentChat,setcurrentChat }) {
     const [search, setSearch] = useState('')
     const [conversations, setConversations] = useState([])
 
@@ -26,6 +26,19 @@ function Conversation({ user }) {
             getConversation()
         }
     }, [])
+   
+    useEffect(() => {
+      
+        const getMessages = async () => {
+            if (!currentChat) return
+            const res = await fetch(`/api/messages/${currentChat._id}`)
+            const data = await res.json()
+            console.log(data)
+        }
+        return () => {
+            getMessages()
+        }
+    }, [currentChat])
 
 
     return (
@@ -43,7 +56,9 @@ function Conversation({ user }) {
                 />
 
                 {conversations.map((conversation, index) => (
-                    <ChatItem conversation={conversation} currentUser={user} key={index} />
+                    <div key={index} onClick={() => setcurrentChat(conversation)}>
+                        <ChatItem conversation={conversation} currentUser={user} />
+                    </div>
                 ))}
 
 

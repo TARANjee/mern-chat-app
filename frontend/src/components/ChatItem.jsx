@@ -12,7 +12,6 @@ function ChatItem({ conversation, currentUser }) {
             try {
                 const res = await fetch(`/api/auth?userId=${friendId}`)
                 const data = await res.json()
-                console.log(data)
                 setUser(data)
             } catch (error) {
                 console.log(error)
@@ -25,7 +24,7 @@ function ChatItem({ conversation, currentUser }) {
     }, [currentUser, conversation])
 
     return (
-        <div className='flex items-center gap-5 my-5'>
+        <div className='flex items-center gap-5 cursor-pointer my-2 py-3 px-2 hover:bg-gray-200'>
             <img className='w-12 h-12 rounded-full' src="https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg" alt="" />
             <p className='text-xl font-medium'>{user && user.name}</p>
         </div>
