@@ -1,12 +1,33 @@
 import React from 'react'
+import { useEffect } from 'react'
+import { useState } from 'react'
 
-function ChatItem() {
+function ChatItem({ conversation, currentUser }) {
+    const [user, setUser] = useState(null)
+
+    useEffect(() => {
+        const friendId = conversation.members.find((m) => m !== currentUser._id)
+
+        const getUser = async () => {
+            try {
+                const res = await fetch(`/api/auth?userId=${friendId}`)
+                const data = await res.json()
+                console.log(data)
+                setUser(data)
+            } catch (error) {
+                console.log(error)
+            }
+
+        }
+        return () => {
+            getUser()
+        }
+    }, [currentUser, conversation])
+
     return (
         <div className='flex items-center gap-5 my-5'>
-            <img className='w-12 h-12 rounded-full' src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" />
-            <div>
-                <p className='text-xl font-medium'>john Doe</p>
-            </div>
+            <img className='w-12 h-12 rounded-full' src="https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg" alt="" />
+            <p className='text-xl font-medium'>{user && user.name}</p>
         </div>
     )
 }

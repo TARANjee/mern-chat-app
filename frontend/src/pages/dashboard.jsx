@@ -3,55 +3,46 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import { useState } from 'react'
-import ChatItem from '../components/ChatItem'
 import Message from '../components/Message'
 import ChatOnline from '../components/ChatOnline'
+import Conversation from '../components/Conversation'
 
 function Dashboard() {
-  const [search, setSearch] = useState('')
+  const [user, setUser] = useState(null)
+  
   const navigate = useNavigate()
 
   useEffect(() => {
+
     async function getUser() {
       const request = await fetch('/api/auth/home')
       const res = await request.json()
-      console.log(res)
+
       if (res.msg !== 'success') {
         navigate('/login')
       }
+      const request2 = await fetch(`/api/auth?email=${res.email}`)
+      const data = await request2.json()
+
+      setUser(data)
     }
+
     return () => {
       getUser()
     }
-
-
   }, [])
+
+
 
   return (
     <div>
       <Navbar />
       <div className='w-full flex height'>
-
-        <div className='chatMenu'>
-          <div className='p-5'>
-
-            <input
-              type="text"
-              name="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className=" border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 "
-              placeholder="Search for friends"
-              required />
-
-            <ChatItem />
-            <ChatItem />
-            <ChatItem />
-            <ChatItem />
+        {user !== null ? (
+          <Conversation user={user} />
+        ) : ''}
 
 
-          </div>
-        </div>
         <div className='chatBox  '>
           <div className='height2 overflow-y-scroll'>
             <div className='p-5 '>
@@ -60,16 +51,6 @@ function Dashboard() {
               <Message />
               <Message />
               <Message own={true} />
-              <Message />
-              <Message />
-              <Message own={true} />
-              <Message />
-              <Message />
-              <Message own={true} />
-              <Message />
-              <Message />
-              <Message own={true} />
-              <Message />
               <Message />
               <Message own={true} />
               <Message />
@@ -92,7 +73,7 @@ function Dashboard() {
         </div>
         <div className='chatOnine'>
           <div className='p-5'>
-            
+
             <ChatOnline />
             <ChatOnline />
             <ChatOnline />

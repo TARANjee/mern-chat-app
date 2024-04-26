@@ -19,7 +19,20 @@ router.get('/home', (req, res) => {
     })
 
 })
+router.get('/', async (req, res) => {
+    const email = req.query.email
+    console.log(email)
+    const userId = req.query.userId
+    try {
+        const user = userId
+            ? await User.findById({ _id: userId })
+            : await User.findOne({ email })
 
+        res.status(200).json(user)
+    } catch (error) {
+        res.status(500).json(error.message)
+    }
+})
 router.post('/login', async (req, res) => {
     const { email, password } = req.body
 
@@ -28,7 +41,7 @@ router.post('/login', async (req, res) => {
         console.log(user)
         if (!user) return res.json({ msg: "not exist" })
         if (password == user.password) {
-            const token = jwt.sign({ email: user.email }, 'jwt-secret-key', { expiresIn: '10s' })
+            const token = jwt.sign({ email: user.email }, 'jwt-secret-key', { expiresIn: '1d' })
             res.cookie("token", token);
             res.send({ msg: 'exist' })
         }
