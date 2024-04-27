@@ -21,7 +21,6 @@ router.get('/home', (req, res) => {
 })
 router.get('/', async (req, res) => {
     const email = req.query.email
-    console.log(email)
     const userId = req.query.userId
     try {
         const user = userId
@@ -38,7 +37,7 @@ router.post('/login', async (req, res) => {
 
     try {
         const user = await User.findOne({ email })
-        console.log(user)
+       
         if (!user) return res.json({ msg: "not exist" })
         if (password == user.password) {
             const token = jwt.sign({ email: user.email }, 'jwt-secret-key', { expiresIn: '1d' })

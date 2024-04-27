@@ -3,7 +3,7 @@ import { useState } from 'react'
 import ChatItem from '../components/ChatItem'
 import { useEffect } from 'react'
 
-function Conversation({ user, currentChat,setcurrentChat }) {
+function Conversation({ user, currentChat, handleChat }) {
     const [search, setSearch] = useState('')
     const [conversations, setConversations] = useState([])
 
@@ -27,22 +27,10 @@ function Conversation({ user, currentChat,setcurrentChat }) {
         }
     }, [])
    
-    useEffect(() => {
-      
-        const getMessages = async () => {
-            if (!currentChat) return
-            const res = await fetch(`/api/messages/${currentChat._id}`)
-            const data = await res.json()
-            console.log(data)
-        }
-        return () => {
-            getMessages()
-        }
-    }, [currentChat])
-
+   
 
     return (
-        <div className='chatMenu'>
+        <div className='chatMenu bg-gray-100 '>
             <div className='p-5'>
 
                 <input
@@ -56,7 +44,7 @@ function Conversation({ user, currentChat,setcurrentChat }) {
                 />
 
                 {conversations.map((conversation, index) => (
-                    <div key={index} onClick={() => setcurrentChat(conversation)}>
+                    <div key={index} onClick={() => handleChat(conversation)}>
                         <ChatItem conversation={conversation} currentUser={user} />
                     </div>
                 ))}

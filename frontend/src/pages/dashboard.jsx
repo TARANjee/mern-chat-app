@@ -10,13 +10,12 @@ import Conversation from '../components/Conversation'
 
 function Dashboard() {
   const [user, setUser] = useState(null)
-  const [currentChat, setcurrentChat] = useState(null)
-
+  const [currentChat, setCurrentChat] = useState(null)
   const [messages, setMessages] = useState([])
   const navigate = useNavigate()
+  const [newMessage, setNewMessage] = useState("")
 
   useEffect(() => {
-
     async function getUser() {
       const request = await fetch('/api/auth/home')
       const res = await request.json()
@@ -26,7 +25,6 @@ function Dashboard() {
       }
       const request2 = await fetch(`/api/auth?email=${res.email}`)
       const data = await request2.json()
-
       setUser(data)
     }
 
@@ -34,42 +32,84 @@ function Dashboard() {
       getUser()
     }
   }, [])
+  const getMessages = async () => {
+    console.log(currentChat)
+    if (!currentChat) return
+    try {
+      const res = await fetch(`/api/messages/${currentChat._id}`)
+      const data = await res.json()
+      console.log(data)
+      setMessages(data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  useEffect(() => {
+    getMessages()
 
+  }, [currentChat])
+
+
+  const handleChat = async (c) => {
+    console.log(c)
+    setCurrentChat(c)
+  }
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const message = {
+      sender: user._id,
+      text: newMessage,
+      conversationId: currentChat._id
+    }
+
+    try {
+      const res = await fetch('/api/messages', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(message)
+      })
+      const data = await res.json()
+      console.log(data)
+      setMessages([...messages, data])
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   return (
     <div>
       <Navbar />
       <div className='w-full flex height'>
         {user !== null ? (
-          <Conversation user={user} currentChat={currentChat} setcurrentChat={setcurrentChat} />
+          <Conversation user={user} handleChat={handleChat} />
         ) : ''}
 
 
-        <div className='chatBox  '>
+        <div className='chatBox  px-2'>
           {currentChat ? (
             <div>
               <div className='height2 overflow-y-scroll'>
 
                 <div className='p-5 '>
-                  <Message />
-                  <Message own={true} />
-                  <Message />
-                  <Message />
-                  <Message own={true} />
-                  <Message />
-                  <Message own={true} />
-                  <Message />
+                  {messages && messages.map((message, index) => (
+                    <Message key={index} user={user} message={message} />
+                  ))}
+
                 </div>
               </div>
               <div className='mt-5 flex items-center justify-between'>
                 <textarea
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
                   id="message"
                   rows="4"
-                  className="block p-2.5 w-full text-lgtext-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="resize-none block p-2.5 w-full text-lgtext-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Write Something here...">
                 </textarea>
                 <button
-                  type="submit"
+                  onClick={handleSubmit}
                   className="w-50 m-5 text-white bg-teal-600 hover:bg-teal-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-lg px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                   Send
                 </button>
