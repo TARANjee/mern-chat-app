@@ -1,19 +1,31 @@
-import React from 'react'
-import { useEffect } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
-import { useState } from 'react'
 import ChatItem from '../components/ChatItem'
 import Message from '../components/Message'
 import ChatOnline from '../components/ChatOnline'
 import Conversation from '../components/Conversation'
+import { io } from 'socket.io-client';
 
 function Dashboard() {
   const [user, setUser] = useState(null)
   const [currentChat, setCurrentChat] = useState(null)
   const [messages, setMessages] = useState([])
+  const [socket, setSocket] = useState(null)
   const navigate = useNavigate()
   const [newMessage, setNewMessage] = useState("")
+  const scrollRef = useRef()
+
+  useEffect(() => {
+    setSocket(io("ws://localhost:4000"))
+  }, [])
+
+  console.log(socket)
+  // useEffect(() => {
+  //   socket?.on("welcome", msg => {
+  //     console.log(msg)
+  //   })
+  // }, [socket])
 
   useEffect(() => {
     async function getUser() {
@@ -33,13 +45,12 @@ function Dashboard() {
     }
   }, [])
   const getMessages = async () => {
-    console.log(currentChat)
     if (!currentChat) return
     try {
       const res = await fetch(`/api/messages/${currentChat._id}`)
       const data = await res.json()
-      console.log(data)
       setMessages(data)
+
     } catch (error) {
       console.log(error)
     }
@@ -71,12 +82,16 @@ function Dashboard() {
         body: JSON.stringify(message)
       })
       const data = await res.json()
-      console.log(data)
       setMessages([...messages, data])
+      setNewMessage("")
     } catch (error) {
       console.log(error)
     }
   }
+
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
 
   return (
     <div>
@@ -94,7 +109,9 @@ function Dashboard() {
 
                 <div className='p-5 '>
                   {messages && messages.map((message, index) => (
-                    <Message key={index} user={user} message={message} />
+                    <div key={index} ref={scrollRef}>
+                      <Message user={user} message={message} />
+                    </div>
                   ))}
 
                 </div>
