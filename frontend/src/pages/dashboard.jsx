@@ -11,14 +11,38 @@ function Dashboard() {
   const [user, setUser] = useState(null)
   const [currentChat, setCurrentChat] = useState(null)
   const [messages, setMessages] = useState([])
-  const [socket, setSocket] = useState(null)
+  const [arrivalMessage, setArrivalMessage] = useState(null)
+  const socket = useRef()
   const navigate = useNavigate()
   const [newMessage, setNewMessage] = useState("")
   const scrollRef = useRef()
 
   useEffect(() => {
-    setSocket(io("ws://localhost:4000"))
+    socket.current = io("ws://localhost:4000")
+    socket.current.on("getMessage", data => {
+      setArrivalMessage({
+        sender: data.senderId,
+        text: data.text,
+        createdAt: Date.now()
+      })
+    })
   }, [])
+
+  useEffect(() => {
+    arrivalMessage && 
+    currentChat?.members.includes(arrivalMessage.sender) &&
+      setMessages(prev => [...prev, arrivalMessage])
+
+  }, [arrivalMessage, currentChat])
+
+
+  useEffect(() => {
+    if (!user) return
+    socket.current.emit("addUser", user._id)
+    socket.current.on("getUsers", (users) => {
+      console.log(users)
+    })
+  }, [user])
 
   console.log(socket)
   // useEffect(() => {
@@ -72,7 +96,12 @@ function Dashboard() {
       text: newMessage,
       conversationId: currentChat._id
     }
-
+    const receiverId = currentChat.members.find(member => member !== user._id)
+    socket.current.emit("sendMessage", {
+      senderId: user._id,
+      receiverId,
+      text: newMessage
+    })
     try {
       const res = await fetch('/api/messages', {
         method: "POST",
@@ -88,6 +117,9 @@ function Dashboard() {
       console.log(error)
     }
   }
+
+
+
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" })
