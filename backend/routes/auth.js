@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import { Router as expressRouter } from 'express';
+import { comparePassword, hashpassword } from '../helper.js';
 
 const router = expressRouter();
 
@@ -10,7 +11,7 @@ router.get('/home', (req, res) => {
         return res.json("The token was not available")
     }
 
-    jwt.verify(token, "jwt-secret-key", (err, decoded) => {
+    jwt.verify(token, process.env.JWT_TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.clearCookie("token");
             return res.json({ msg: "token is wrong" })
@@ -37,10 +38,12 @@ router.post('/login', async (req, res) => {
 
     try {
         const user = await User.findOne({ email })
-       
+        
         if (!user) return res.json({ msg: "not exist" })
-        if (password == user.password) {
-            const token = jwt.sign({ email: user.email }, 'jwt-secret-key', { expiresIn: '1d' })
+
+        
+        if (comparePassword(password, user.password)) {
+            const token = jwt.sign({ email: user.email }, process.env.JWT_TOKEN_KEY, { expiresIn: '1d' })
             res.cookie("token", token);
             res.send({ msg: 'exist' })
         }
@@ -60,8 +63,9 @@ router.post('/register', async (req, res) => {
     try {
         const finduser = await User.findOne({ email })
         if (finduser) return res.json({ msg: "exist" })
+        let hashpass = hashpassword(password)
 
-        await User.create({ name, email, password })
+        await User.create({ name, email, password: hashpass })
 
         res.send({ msg: "success" })
 

@@ -1,25 +1,26 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
+import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import ChatItem from '../components/ChatItem'
 import Message from '../components/Message'
 import ChatOnline from '../components/ChatOnline'
 import Conversation from '../components/Conversation'
-import { io } from 'socket.io-client';
 
 function Dashboard() {
   const [user, setUser] = useState(null)
   const [currentChat, setCurrentChat] = useState(null)
+  const [newMessage, setNewMessage] = useState('')
   const [messages, setMessages] = useState([])
   const [arrivalMessage, setArrivalMessage] = useState(null)
-  const socket = useRef()
+  const [onlineUsers, setOnlineusers] = useState(null)
   const navigate = useNavigate()
-  const [newMessage, setNewMessage] = useState("")
-  const scrollRef = useRef()
+  const socket = useRef()
+  const scrollref = useRef()
 
   useEffect(() => {
     socket.current = io("ws://localhost:4000")
-    socket.current.on("getMessage", data => {
+    socket.current.on("getMessage", (data) => {
       setArrivalMessage({
         sender: data.senderId,
         text: data.text,
@@ -29,10 +30,9 @@ function Dashboard() {
   }, [])
 
   useEffect(() => {
-    arrivalMessage && 
-    currentChat?.members.includes(arrivalMessage.sender) &&
+    arrivalMessage &&
+      currentChat?.members.includes(arrivalMessage.sender) &&
       setMessages(prev => [...prev, arrivalMessage])
-
   }, [arrivalMessage, currentChat])
 
 
@@ -40,18 +40,20 @@ function Dashboard() {
     if (!user) return
     socket.current.emit("addUser", user._id)
     socket.current.on("getUsers", (users) => {
-      console.log(users)
+      setOnlineusers(users)
     })
   }, [user])
 
-  console.log(socket)
-  // useEffect(() => {
-  //   socket?.on("welcome", msg => {
-  //     console.log(msg)
-  //   })
-  // }, [socket])
+
+
 
   useEffect(() => {
+    scrollref.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
+
+
+  useEffect(() => {
+
     async function getUser() {
       const request = await fetch('/api/auth/home')
       const res = await request.json()
@@ -68,33 +70,31 @@ function Dashboard() {
       getUser()
     }
   }, [])
+
   const getMessages = async () => {
     if (!currentChat) return
     try {
       const res = await fetch(`/api/messages/${currentChat._id}`)
       const data = await res.json()
       setMessages(data)
-
     } catch (error) {
       console.log(error)
     }
   }
   useEffect(() => {
     getMessages()
-
   }, [currentChat])
 
-
   const handleChat = async (c) => {
-    console.log(c)
     setCurrentChat(c)
   }
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    const message = {
+
+  const handleSubmit = async () => {
+    
+    let msg = {
+      conversationId: currentChat._id,
       sender: user._id,
-      text: newMessage,
-      conversationId: currentChat._id
+      text: newMessage
     }
     const receiverId = currentChat.members.find(member => member !== user._id)
     socket.current.emit("sendMessage", {
@@ -103,12 +103,12 @@ function Dashboard() {
       text: newMessage
     })
     try {
-      const res = await fetch('/api/messages', {
+      const res = await fetch("/api/messages/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(message)
+        body: JSON.stringify(msg)
       })
       const data = await res.json()
       setMessages([...messages, data])
@@ -117,13 +117,6 @@ function Dashboard() {
       console.log(error)
     }
   }
-
-
-
-
-  useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
 
   return (
     <div>
@@ -134,21 +127,22 @@ function Dashboard() {
         ) : ''}
 
 
-        <div className='chatBox  px-2'>
+        <div className='chatBox  '>
           {currentChat ? (
             <div>
               <div className='height2 overflow-y-scroll'>
 
                 <div className='p-5 '>
                   {messages && messages.map((message, index) => (
-                    <div key={index} ref={scrollRef}>
-                      <Message user={user} message={message} />
+                    <div key={index} ref={scrollref} >
+                      <Message message={message} user={user} />
                     </div>
                   ))}
 
+
                 </div>
               </div>
-              <div className='mt-5 flex items-center justify-between'>
+              <div className='px-2 mt-5 flex items-center justify-between'>
                 <textarea
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
@@ -159,6 +153,7 @@ function Dashboard() {
                 </textarea>
                 <button
                   onClick={handleSubmit}
+                  type="submit"
                   className="w-50 m-5 text-white bg-teal-600 hover:bg-teal-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-lg px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                   Send
                 </button>
@@ -169,9 +164,11 @@ function Dashboard() {
         <div className='chatOnine'>
           <div className='p-5'>
 
-            <ChatOnline />
-            <ChatOnline />
-            <ChatOnline />
+            <ChatOnline
+              onlineUsers={onlineUsers}
+              currentId={user && user._id}
+            />
+
           </div>
         </div>
       </div>

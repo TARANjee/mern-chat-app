@@ -3,7 +3,7 @@ import { useState } from 'react'
 import ChatItem from '../components/ChatItem'
 import { useEffect } from 'react'
 
-function Conversation({ user, currentChat, handleChat }) {
+function Conversation({ user, handleChat }) {
     const [search, setSearch] = useState('')
     const [conversations, setConversations] = useState([])
 
@@ -26,11 +26,11 @@ function Conversation({ user, currentChat, handleChat }) {
             getConversation()
         }
     }, [])
-   
-   
+
+
 
     return (
-        <div className='chatMenu bg-gray-100 '>
+        <div className='chatMenu bg-gray-200'>
             <div className='p-5'>
 
                 <input
@@ -43,7 +43,7 @@ function Conversation({ user, currentChat, handleChat }) {
                     required
                 />
 
-                {conversations.map((conversation, index) => (
+                {conversations && conversations.map((conversation, index) => (
                     <div key={index} onClick={() => handleChat(conversation)}>
                         <ChatItem conversation={conversation} currentUser={user} />
                     </div>

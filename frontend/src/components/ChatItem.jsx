@@ -25,7 +25,7 @@ function ChatItem({ conversation, currentUser }) {
 
     return (
         <div className='flex items-center gap-5 cursor-pointer my-2 py-3 px-2 hover:bg-gray-200'>
-            <img className='w-12 h-12 rounded-full' src="https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg" alt="" />
+            <img className='w-12 h-12 rounded-full' src={user && user.profile_picture ? user.profile_picture : `https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg`} alt="" />
             <p className='text-xl font-medium'>{user && user.name}</p>
         </div>
     )
