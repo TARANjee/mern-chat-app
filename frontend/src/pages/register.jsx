@@ -7,13 +7,14 @@ function Register() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [cpassword, setCpassword] = useState('')
   const navigate = useNavigate()
 
   useEffect(() => {
     async function getUser() {
       const request = await fetch('/api/auth/home')
       const res = await request.json()
-      console.log(res)
+
       if (res.msg == 'success') {
         navigate('/')
       }
@@ -27,6 +28,19 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    const isValidEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
+    if (!email.match(isValidEmail)) {
+      alert("email is not valid")
+    }
+    if (password.length < 6) {
+      alert("password length should be 6 character")
+    }
+    if (password !== cpassword) {
+      alert("password doesn't match")
+    }
+
+
     const user = {
       name,
       email,
@@ -89,7 +103,15 @@ function Register() {
               placeholder="Password"
               className=" border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 "
               required />
-            <input type="password" name="cpassword" id="cpassword" placeholder="Confirm Password" className=" border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 " required />
+            <input
+              type="password"
+              name="cpassword"
+              id="cpassword"
+              value={cpassword}
+              onChange={(e) => setCpassword(e.target.value)}
+              placeholder="Confirm Password"
+              className=" border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 "
+              required />
 
 
             <button type="submit" className="w-full text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-lg px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Sign Up</button>

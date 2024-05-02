@@ -12,7 +12,7 @@ function classNames(...classes) {
 export default function Navbar() {
     const [user, setUser] = useState(null)
     const navigate = useNavigate()
-    console.log("user", user)
+    
     useEffect(() => {
         async function getUser() {
             const request = await fetch('/api/auth/home')

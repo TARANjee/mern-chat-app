@@ -6,13 +6,13 @@ import { Link, useNavigate } from 'react-router-dom'
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
- 
+
   const navigate = useNavigate()
   useEffect(() => {
     async function getUser() {
       const request = await fetch('/api/auth/home')
       const res = await request.json()
-      console.log(res)
+      
       if (res.msg == 'success') {
         navigate('/')
       }
@@ -39,9 +39,16 @@ function Login() {
         body: JSON.stringify(user)
       })
       const data = await request.json()
-      console.log(data)
+     
+
       if (data.msg == "exist") {
         navigate('/')
+      }
+      else if (data.msg === "not exist") {
+        alert("User not exist, Please Register first.")
+      }
+      else {
+        alert(data.msg)
       }
     } catch (error) {
       console.log(error.message)

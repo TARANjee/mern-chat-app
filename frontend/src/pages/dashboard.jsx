@@ -14,6 +14,7 @@ function Dashboard() {
   const [messages, setMessages] = useState([])
   const [arrivalMessage, setArrivalMessage] = useState(null)
   const [onlineUsers, setOnlineusers] = useState(null)
+  const [receiver, setReceiver] = useState(null)
   const navigate = useNavigate()
   const socket = useRef()
   const scrollref = useRef()
@@ -87,20 +88,34 @@ function Dashboard() {
 
   const handleChat = async (c) => {
     setCurrentChat(c)
+    const receiverId = c.members.find(member => member !== user._id)
+    try {
+      const req = await fetch(`/api/auth?userId=${receiverId}`)
+      const data = await req.json()
+      setReceiver(data)
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   const handleSubmit = async () => {
-    
+    let newmsg = newMessage.trim()
+    if (newmsg.length == 0) {
+      alert("please write something")
+      setNewMessage('')
+      return
+    }
+    console.log(newmsg)
     let msg = {
       conversationId: currentChat._id,
       sender: user._id,
-      text: newMessage
+      text: newmsg
     }
     const receiverId = currentChat.members.find(member => member !== user._id)
     socket.current.emit("sendMessage", {
       senderId: user._id,
       receiverId,
-      text: newMessage
+      text: newmsg
     })
     try {
       const res = await fetch("/api/messages/", {
@@ -130,8 +145,12 @@ function Dashboard() {
         <div className='chatBox  '>
           {currentChat ? (
             <div>
+              <div className='flex items-center gap-5  my-2 py-3 px-2 '>
+                <img className='w-12 h-12 rounded-full' src={receiver && receiver.profile_picture ? user.profile_picture : `https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg`} alt="" />
+                <p className='text-xl font-medium'>{receiver && receiver.name}</p>
+              </div>
               <div className='height2 overflow-y-scroll'>
-
+               
                 <div className='p-5 '>
                   {messages && messages.map((message, index) => (
                     <div key={index} ref={scrollref} >
