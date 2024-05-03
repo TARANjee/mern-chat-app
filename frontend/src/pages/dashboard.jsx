@@ -105,16 +105,17 @@ function Dashboard() {
       setNewMessage('')
       return
     }
-    console.log(newmsg)
+    
     let msg = {
       conversationId: currentChat._id,
       sender: user._id,
       text: newmsg
     }
-    const receiverId = currentChat.members.find(member => member !== user._id)
+    // const receiverId = currentChat.members.find(member => member !== user._id)
+    // console.log(receiver)
     socket.current.emit("sendMessage", {
       senderId: user._id,
-      receiverId,
+      receiverId: receiver._id,
       text: newmsg
     })
     try {
@@ -150,7 +151,7 @@ function Dashboard() {
                 <p className='text-xl font-medium'>{receiver && receiver.name}</p>
               </div>
               <div className='height2 overflow-y-scroll'>
-               
+
                 <div className='p-5 '>
                   {messages && messages.map((message, index) => (
                     <div key={index} ref={scrollref} >
